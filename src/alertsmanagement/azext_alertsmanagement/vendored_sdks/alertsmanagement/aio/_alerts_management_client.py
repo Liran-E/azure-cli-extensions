@@ -5,33 +5,28 @@
 # --------------------------------------------------------------------------
 
 from copy import deepcopy
-from typing import TYPE_CHECKING
+from typing import Any, Awaitable, Optional
 
-from azure.core import PipelineClient
+from azure.core import AsyncPipelineClient
+from azure.core.rest import AsyncHttpResponse, HttpRequest
 from msrest import Deserializer, Serializer
 
-from . import models
+from .. import models
 from ._configuration import AlertsManagementClientConfiguration
 from .operations import AlertProcessingRulesOperations, AlertsOperations, Operations, SmartGroupsOperations
 
-if TYPE_CHECKING:
-    # pylint: disable=unused-import,ungrouped-imports
-    from typing import Any, Optional
-
-    from azure.core.rest import HttpRequest, HttpResponse
-
-class AlertsManagementClient(object):
+class AlertsManagementClient:
     """AlertsManagement Client.
 
     :ivar alert_processing_rules: AlertProcessingRulesOperations operations
     :vartype alert_processing_rules:
-     alerts_management_client.operations.AlertProcessingRulesOperations
+     alerts_management_client.aio.operations.AlertProcessingRulesOperations
     :ivar operations: Operations operations
-    :vartype operations: alerts_management_client.operations.Operations
+    :vartype operations: alerts_management_client.aio.operations.Operations
     :ivar alerts: AlertsOperations operations
-    :vartype alerts: alerts_management_client.operations.AlertsOperations
+    :vartype alerts: alerts_management_client.aio.operations.AlertsOperations
     :ivar smart_groups: SmartGroupsOperations operations
-    :vartype smart_groups: alerts_management_client.operations.SmartGroupsOperations
+    :vartype smart_groups: alerts_management_client.aio.operations.SmartGroupsOperations
     :param subscription_id: The ID of the target subscription.
     :type subscription_id: str
     :param base_url: Service URL. Default value is 'https://management.azure.com'.
@@ -40,13 +35,12 @@ class AlertsManagementClient(object):
 
     def __init__(
         self,
-        subscription_id,  # type: str
-        base_url="https://management.azure.com",  # type: str
-        **kwargs  # type: Any
-    ):
-        # type: (...) -> None
+        subscription_id: str,
+        base_url: str = "https://management.azure.com",
+        **kwargs: Any
+    ) -> None:
         self._config = AlertsManagementClientConfiguration(subscription_id=subscription_id, **kwargs)
-        self._client = PipelineClient(base_url=base_url, config=self._config, **kwargs)
+        self._client = AsyncPipelineClient(base_url=base_url, config=self._config, **kwargs)
 
         client_models = {k: v for k, v in models.__dict__.items() if isinstance(v, type)}
         self._serialize = Serializer(client_models)
@@ -60,17 +54,16 @@ class AlertsManagementClient(object):
 
     def _send_request(
         self,
-        request,  # type: HttpRequest
-        **kwargs  # type: Any
-    ):
-        # type: (...) -> HttpResponse
+        request: HttpRequest,
+        **kwargs: Any
+    ) -> Awaitable[AsyncHttpResponse]:
         """Runs the network request through the client's chained policies.
 
         >>> from azure.core.rest import HttpRequest
         >>> request = HttpRequest("GET", "https://www.example.org/")
         <HttpRequest [GET], url: 'https://www.example.org/'>
-        >>> response = client._send_request(request)
-        <HttpResponse: 200 OK>
+        >>> response = await client._send_request(request)
+        <AsyncHttpResponse: 200 OK>
 
         For more information on this code flow, see https://aka.ms/azsdk/python/protocol/quickstart
 
@@ -78,22 +71,19 @@ class AlertsManagementClient(object):
         :type request: ~azure.core.rest.HttpRequest
         :keyword bool stream: Whether the response payload will be streamed. Defaults to False.
         :return: The response of your network call. Does not do error handling on your response.
-        :rtype: ~azure.core.rest.HttpResponse
+        :rtype: ~azure.core.rest.AsyncHttpResponse
         """
 
         request_copy = deepcopy(request)
         request_copy.url = self._client.format_url(request_copy.url)
         return self._client.send_request(request_copy, **kwargs)
 
-    def close(self):
-        # type: () -> None
-        self._client.close()
+    async def close(self) -> None:
+        await self._client.close()
 
-    def __enter__(self):
-        # type: () -> AlertsManagementClient
-        self._client.__enter__()
+    async def __aenter__(self) -> "AlertsManagementClient":
+        await self._client.__aenter__()
         return self
 
-    def __exit__(self, *exc_details):
-        # type: (Any) -> None
-        self._client.__exit__(*exc_details)
+    async def __aexit__(self, *exc_details) -> None:
+        await self._client.__aexit__(*exc_details)

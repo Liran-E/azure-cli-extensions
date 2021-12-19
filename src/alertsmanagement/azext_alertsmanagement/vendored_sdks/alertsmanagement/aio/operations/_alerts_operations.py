@@ -4,320 +4,25 @@
 # Changes may cause incorrect behavior and will be lost if the code is regenerated.
 # --------------------------------------------------------------------------
 import functools
-from typing import TYPE_CHECKING
+from typing import Any, AsyncIterable, Callable, Dict, Generic, Optional, TypeVar, Union
 import warnings
 
+from azure.core.async_paging import AsyncItemPaged, AsyncList
 from azure.core.exceptions import ClientAuthenticationError, HttpResponseError, ResourceExistsError, ResourceNotFoundError, map_error
-from azure.core.paging import ItemPaged
 from azure.core.pipeline import PipelineResponse
-from azure.core.pipeline.transport import HttpResponse
+from azure.core.pipeline.transport import AsyncHttpResponse
 from azure.core.rest import HttpRequest
 from azure.core.tracing.decorator import distributed_trace
-from msrest import Serializer
+from azure.core.tracing.decorator_async import distributed_trace_async
 
-from .. import models as _models
-from .._vendor import _convert_request, _format_url_section
+from ... import models as _models
+from ..._vendor import _convert_request
+from ...operations._alerts_operations import build_change_state_request, build_get_all_request, build_get_by_id_request, build_get_history_request, build_get_summary_request, build_meta_data_request
+T = TypeVar('T')
+ClsType = Optional[Callable[[PipelineResponse[HttpRequest, AsyncHttpResponse], T, Dict[str, Any]], Any]]
 
-if TYPE_CHECKING:
-    # pylint: disable=unused-import,ungrouped-imports
-    from typing import Any, Callable, Dict, Generic, Iterable, Optional, TypeVar, Union
-    T = TypeVar('T')
-    ClsType = Optional[Callable[[PipelineResponse[HttpRequest, HttpResponse], T, Dict[str, Any]], Any]]
-
-_SERIALIZER = Serializer()
-_SERIALIZER.client_side_validation = False
-# fmt: off
-
-def build_meta_data_request(
-    **kwargs  # type: Any
-):
-    # type: (...) -> HttpRequest
-    api_version = kwargs.pop('api_version', "2019-05-05-preview")  # type: str
-    identifier = kwargs.pop('identifier')  # type: Union[str, "_models.Identifier"]
-
-    accept = "application/json"
-    # Construct URL
-    url = kwargs.pop("template_url", '/providers/Microsoft.AlertsManagement/alertsMetaData')
-
-    # Construct parameters
-    query_parameters = kwargs.pop("params", {})  # type: Dict[str, Any]
-    query_parameters['api-version'] = _SERIALIZER.query("api_version", api_version, 'str')
-    query_parameters['identifier'] = _SERIALIZER.query("identifier", identifier, 'str')
-
-    # Construct headers
-    header_parameters = kwargs.pop("headers", {})  # type: Dict[str, Any]
-    header_parameters['Accept'] = _SERIALIZER.header("accept", accept, 'str')
-
-    return HttpRequest(
-        method="GET",
-        url=url,
-        params=query_parameters,
-        headers=header_parameters,
-        **kwargs
-    )
-
-
-def build_get_all_request(
-    subscription_id,  # type: str
-    **kwargs  # type: Any
-):
-    # type: (...) -> HttpRequest
-    api_version = kwargs.pop('api_version', "2019-05-05-preview")  # type: str
-    target_resource = kwargs.pop('target_resource', None)  # type: Optional[str]
-    target_resource_type = kwargs.pop('target_resource_type', None)  # type: Optional[str]
-    target_resource_group = kwargs.pop('target_resource_group', None)  # type: Optional[str]
-    monitor_service = kwargs.pop('monitor_service', None)  # type: Optional[Union[str, "_models.MonitorService"]]
-    monitor_condition = kwargs.pop('monitor_condition', None)  # type: Optional[Union[str, "_models.MonitorCondition"]]
-    severity = kwargs.pop('severity', None)  # type: Optional[Union[str, "_models.Severity"]]
-    alert_state = kwargs.pop('alert_state', None)  # type: Optional[Union[str, "_models.AlertState"]]
-    alert_rule = kwargs.pop('alert_rule', None)  # type: Optional[str]
-    smart_group_id = kwargs.pop('smart_group_id', None)  # type: Optional[str]
-    include_context = kwargs.pop('include_context', None)  # type: Optional[bool]
-    include_egress_config = kwargs.pop('include_egress_config', None)  # type: Optional[bool]
-    page_count = kwargs.pop('page_count', None)  # type: Optional[int]
-    sort_by = kwargs.pop('sort_by', None)  # type: Optional[Union[str, "_models.AlertsSortByFields"]]
-    sort_order = kwargs.pop('sort_order', None)  # type: Optional[Union[str, "_models.SortOrder"]]
-    select = kwargs.pop('select', None)  # type: Optional[str]
-    time_range = kwargs.pop('time_range', None)  # type: Optional[Union[str, "_models.TimeRange"]]
-    custom_time_range = kwargs.pop('custom_time_range', None)  # type: Optional[str]
-
-    accept = "application/json"
-    # Construct URL
-    url = kwargs.pop("template_url", '/subscriptions/{subscriptionId}/providers/Microsoft.AlertsManagement/alerts')
-    path_format_arguments = {
-        "subscriptionId": _SERIALIZER.url("subscription_id", subscription_id, 'str', min_length=1),
-    }
-
-    url = _format_url_section(url, **path_format_arguments)
-
-    # Construct parameters
-    query_parameters = kwargs.pop("params", {})  # type: Dict[str, Any]
-    if target_resource is not None:
-        query_parameters['targetResource'] = _SERIALIZER.query("target_resource", target_resource, 'str')
-    if target_resource_type is not None:
-        query_parameters['targetResourceType'] = _SERIALIZER.query("target_resource_type", target_resource_type, 'str')
-    if target_resource_group is not None:
-        query_parameters['targetResourceGroup'] = _SERIALIZER.query("target_resource_group", target_resource_group, 'str')
-    if monitor_service is not None:
-        query_parameters['monitorService'] = _SERIALIZER.query("monitor_service", monitor_service, 'str')
-    if monitor_condition is not None:
-        query_parameters['monitorCondition'] = _SERIALIZER.query("monitor_condition", monitor_condition, 'str')
-    if severity is not None:
-        query_parameters['severity'] = _SERIALIZER.query("severity", severity, 'str')
-    if alert_state is not None:
-        query_parameters['alertState'] = _SERIALIZER.query("alert_state", alert_state, 'str')
-    if alert_rule is not None:
-        query_parameters['alertRule'] = _SERIALIZER.query("alert_rule", alert_rule, 'str')
-    if smart_group_id is not None:
-        query_parameters['smartGroupId'] = _SERIALIZER.query("smart_group_id", smart_group_id, 'str')
-    if include_context is not None:
-        query_parameters['includeContext'] = _SERIALIZER.query("include_context", include_context, 'bool')
-    if include_egress_config is not None:
-        query_parameters['includeEgressConfig'] = _SERIALIZER.query("include_egress_config", include_egress_config, 'bool')
-    if page_count is not None:
-        query_parameters['pageCount'] = _SERIALIZER.query("page_count", page_count, 'long')
-    if sort_by is not None:
-        query_parameters['sortBy'] = _SERIALIZER.query("sort_by", sort_by, 'str')
-    if sort_order is not None:
-        query_parameters['SortOrder'] = _SERIALIZER.query("sort_order", sort_order, 'str')
-    if select is not None:
-        query_parameters['select'] = _SERIALIZER.query("select", select, 'str')
-    if time_range is not None:
-        query_parameters['timeRange'] = _SERIALIZER.query("time_range", time_range, 'str')
-    if custom_time_range is not None:
-        query_parameters['customTimeRange'] = _SERIALIZER.query("custom_time_range", custom_time_range, 'str')
-    query_parameters['api-version'] = _SERIALIZER.query("api_version", api_version, 'str')
-
-    # Construct headers
-    header_parameters = kwargs.pop("headers", {})  # type: Dict[str, Any]
-    header_parameters['Accept'] = _SERIALIZER.header("accept", accept, 'str')
-
-    return HttpRequest(
-        method="GET",
-        url=url,
-        params=query_parameters,
-        headers=header_parameters,
-        **kwargs
-    )
-
-
-def build_get_by_id_request(
-    subscription_id,  # type: str
-    alert_id,  # type: str
-    **kwargs  # type: Any
-):
-    # type: (...) -> HttpRequest
-    api_version = kwargs.pop('api_version', "2019-05-05-preview")  # type: str
-
-    accept = "application/json"
-    # Construct URL
-    url = kwargs.pop("template_url", '/subscriptions/{subscriptionId}/providers/Microsoft.AlertsManagement/alerts/{alertId}')
-    path_format_arguments = {
-        "subscriptionId": _SERIALIZER.url("subscription_id", subscription_id, 'str', min_length=1),
-        "alertId": _SERIALIZER.url("alert_id", alert_id, 'str'),
-    }
-
-    url = _format_url_section(url, **path_format_arguments)
-
-    # Construct parameters
-    query_parameters = kwargs.pop("params", {})  # type: Dict[str, Any]
-    query_parameters['api-version'] = _SERIALIZER.query("api_version", api_version, 'str')
-
-    # Construct headers
-    header_parameters = kwargs.pop("headers", {})  # type: Dict[str, Any]
-    header_parameters['Accept'] = _SERIALIZER.header("accept", accept, 'str')
-
-    return HttpRequest(
-        method="GET",
-        url=url,
-        params=query_parameters,
-        headers=header_parameters,
-        **kwargs
-    )
-
-
-def build_change_state_request(
-    subscription_id,  # type: str
-    alert_id,  # type: str
-    **kwargs  # type: Any
-):
-    # type: (...) -> HttpRequest
-    api_version = kwargs.pop('api_version', "2019-05-05-preview")  # type: str
-    new_state = kwargs.pop('new_state')  # type: Union[str, "_models.AlertState"]
-
-    accept = "application/json"
-    # Construct URL
-    url = kwargs.pop("template_url", '/subscriptions/{subscriptionId}/providers/Microsoft.AlertsManagement/alerts/{alertId}/changestate')
-    path_format_arguments = {
-        "subscriptionId": _SERIALIZER.url("subscription_id", subscription_id, 'str', min_length=1),
-        "alertId": _SERIALIZER.url("alert_id", alert_id, 'str'),
-    }
-
-    url = _format_url_section(url, **path_format_arguments)
-
-    # Construct parameters
-    query_parameters = kwargs.pop("params", {})  # type: Dict[str, Any]
-    query_parameters['api-version'] = _SERIALIZER.query("api_version", api_version, 'str')
-    query_parameters['newState'] = _SERIALIZER.query("new_state", new_state, 'str')
-
-    # Construct headers
-    header_parameters = kwargs.pop("headers", {})  # type: Dict[str, Any]
-    header_parameters['Accept'] = _SERIALIZER.header("accept", accept, 'str')
-
-    return HttpRequest(
-        method="POST",
-        url=url,
-        params=query_parameters,
-        headers=header_parameters,
-        **kwargs
-    )
-
-
-def build_get_history_request(
-    subscription_id,  # type: str
-    alert_id,  # type: str
-    **kwargs  # type: Any
-):
-    # type: (...) -> HttpRequest
-    api_version = kwargs.pop('api_version', "2019-05-05-preview")  # type: str
-
-    accept = "application/json"
-    # Construct URL
-    url = kwargs.pop("template_url", '/subscriptions/{subscriptionId}/providers/Microsoft.AlertsManagement/alerts/{alertId}/history')
-    path_format_arguments = {
-        "subscriptionId": _SERIALIZER.url("subscription_id", subscription_id, 'str', min_length=1),
-        "alertId": _SERIALIZER.url("alert_id", alert_id, 'str'),
-    }
-
-    url = _format_url_section(url, **path_format_arguments)
-
-    # Construct parameters
-    query_parameters = kwargs.pop("params", {})  # type: Dict[str, Any]
-    query_parameters['api-version'] = _SERIALIZER.query("api_version", api_version, 'str')
-
-    # Construct headers
-    header_parameters = kwargs.pop("headers", {})  # type: Dict[str, Any]
-    header_parameters['Accept'] = _SERIALIZER.header("accept", accept, 'str')
-
-    return HttpRequest(
-        method="GET",
-        url=url,
-        params=query_parameters,
-        headers=header_parameters,
-        **kwargs
-    )
-
-
-def build_get_summary_request(
-    subscription_id,  # type: str
-    **kwargs  # type: Any
-):
-    # type: (...) -> HttpRequest
-    api_version = kwargs.pop('api_version', "2019-05-05-preview")  # type: str
-    groupby = kwargs.pop('groupby')  # type: Union[str, "_models.AlertsSummaryGroupByFields"]
-    include_smart_groups_count = kwargs.pop('include_smart_groups_count', None)  # type: Optional[bool]
-    target_resource = kwargs.pop('target_resource', None)  # type: Optional[str]
-    target_resource_type = kwargs.pop('target_resource_type', None)  # type: Optional[str]
-    target_resource_group = kwargs.pop('target_resource_group', None)  # type: Optional[str]
-    monitor_service = kwargs.pop('monitor_service', None)  # type: Optional[Union[str, "_models.MonitorService"]]
-    monitor_condition = kwargs.pop('monitor_condition', None)  # type: Optional[Union[str, "_models.MonitorCondition"]]
-    severity = kwargs.pop('severity', None)  # type: Optional[Union[str, "_models.Severity"]]
-    alert_state = kwargs.pop('alert_state', None)  # type: Optional[Union[str, "_models.AlertState"]]
-    alert_rule = kwargs.pop('alert_rule', None)  # type: Optional[str]
-    time_range = kwargs.pop('time_range', None)  # type: Optional[Union[str, "_models.TimeRange"]]
-    custom_time_range = kwargs.pop('custom_time_range', None)  # type: Optional[str]
-
-    accept = "application/json"
-    # Construct URL
-    url = kwargs.pop("template_url", '/subscriptions/{subscriptionId}/providers/Microsoft.AlertsManagement/alertsSummary')
-    path_format_arguments = {
-        "subscriptionId": _SERIALIZER.url("subscription_id", subscription_id, 'str', min_length=1),
-    }
-
-    url = _format_url_section(url, **path_format_arguments)
-
-    # Construct parameters
-    query_parameters = kwargs.pop("params", {})  # type: Dict[str, Any]
-    query_parameters['groupby'] = _SERIALIZER.query("groupby", groupby, 'str')
-    if include_smart_groups_count is not None:
-        query_parameters['includeSmartGroupsCount'] = _SERIALIZER.query("include_smart_groups_count", include_smart_groups_count, 'bool')
-    if target_resource is not None:
-        query_parameters['targetResource'] = _SERIALIZER.query("target_resource", target_resource, 'str')
-    if target_resource_type is not None:
-        query_parameters['targetResourceType'] = _SERIALIZER.query("target_resource_type", target_resource_type, 'str')
-    if target_resource_group is not None:
-        query_parameters['targetResourceGroup'] = _SERIALIZER.query("target_resource_group", target_resource_group, 'str')
-    if monitor_service is not None:
-        query_parameters['monitorService'] = _SERIALIZER.query("monitor_service", monitor_service, 'str')
-    if monitor_condition is not None:
-        query_parameters['monitorCondition'] = _SERIALIZER.query("monitor_condition", monitor_condition, 'str')
-    if severity is not None:
-        query_parameters['severity'] = _SERIALIZER.query("severity", severity, 'str')
-    if alert_state is not None:
-        query_parameters['alertState'] = _SERIALIZER.query("alert_state", alert_state, 'str')
-    if alert_rule is not None:
-        query_parameters['alertRule'] = _SERIALIZER.query("alert_rule", alert_rule, 'str')
-    if time_range is not None:
-        query_parameters['timeRange'] = _SERIALIZER.query("time_range", time_range, 'str')
-    if custom_time_range is not None:
-        query_parameters['customTimeRange'] = _SERIALIZER.query("custom_time_range", custom_time_range, 'str')
-    query_parameters['api-version'] = _SERIALIZER.query("api_version", api_version, 'str')
-
-    # Construct headers
-    header_parameters = kwargs.pop("headers", {})  # type: Dict[str, Any]
-    header_parameters['Accept'] = _SERIALIZER.header("accept", accept, 'str')
-
-    return HttpRequest(
-        method="GET",
-        url=url,
-        params=query_parameters,
-        headers=header_parameters,
-        **kwargs
-    )
-
-# fmt: on
-class AlertsOperations(object):
-    """AlertsOperations operations.
+class AlertsOperations:
+    """AlertsOperations async operations.
 
     You should not instantiate this class directly. Instead, you should create a Client instance that
     instantiates it for you and attaches it as an attribute.
@@ -332,19 +37,18 @@ class AlertsOperations(object):
 
     models = _models
 
-    def __init__(self, client, config, serializer, deserializer):
+    def __init__(self, client, config, serializer, deserializer) -> None:
         self._client = client
         self._serialize = serializer
         self._deserialize = deserializer
         self._config = config
 
-    @distributed_trace
-    def meta_data(
+    @distributed_trace_async
+    async def meta_data(
         self,
-        identifier,  # type: Union[str, "_models.Identifier"]
-        **kwargs  # type: Any
-    ):
-        # type: (...) -> "_models.AlertsMetaData"
+        identifier: Union[str, "_models.Identifier"],
+        **kwargs: Any
+    ) -> "_models.AlertsMetaData":
         """List alerts meta data information based on value of identifier parameter.
 
         :param identifier: Identification of the information to be retrieved by API call.
@@ -374,7 +78,7 @@ class AlertsOperations(object):
         request = _convert_request(request)
         request.url = self._client.format_url(request.url)
 
-        pipeline_response = self._client._pipeline.run(request, stream=False, **kwargs)
+        pipeline_response = await self._client._pipeline.run(request, stream=False, **kwargs)
         response = pipeline_response.http_response
 
         if response.status_code not in [200]:
@@ -395,26 +99,25 @@ class AlertsOperations(object):
     @distributed_trace
     def get_all(
         self,
-        target_resource=None,  # type: Optional[str]
-        target_resource_type=None,  # type: Optional[str]
-        target_resource_group=None,  # type: Optional[str]
-        monitor_service=None,  # type: Optional[Union[str, "_models.MonitorService"]]
-        monitor_condition=None,  # type: Optional[Union[str, "_models.MonitorCondition"]]
-        severity=None,  # type: Optional[Union[str, "_models.Severity"]]
-        alert_state=None,  # type: Optional[Union[str, "_models.AlertState"]]
-        alert_rule=None,  # type: Optional[str]
-        smart_group_id=None,  # type: Optional[str]
-        include_context=None,  # type: Optional[bool]
-        include_egress_config=None,  # type: Optional[bool]
-        page_count=None,  # type: Optional[int]
-        sort_by=None,  # type: Optional[Union[str, "_models.AlertsSortByFields"]]
-        sort_order=None,  # type: Optional[Union[str, "_models.SortOrder"]]
-        select=None,  # type: Optional[str]
-        time_range=None,  # type: Optional[Union[str, "_models.TimeRange"]]
-        custom_time_range=None,  # type: Optional[str]
-        **kwargs  # type: Any
-    ):
-        # type: (...) -> Iterable["_models.AlertsList"]
+        target_resource: Optional[str] = None,
+        target_resource_type: Optional[str] = None,
+        target_resource_group: Optional[str] = None,
+        monitor_service: Optional[Union[str, "_models.MonitorService"]] = None,
+        monitor_condition: Optional[Union[str, "_models.MonitorCondition"]] = None,
+        severity: Optional[Union[str, "_models.Severity"]] = None,
+        alert_state: Optional[Union[str, "_models.AlertState"]] = None,
+        alert_rule: Optional[str] = None,
+        smart_group_id: Optional[str] = None,
+        include_context: Optional[bool] = None,
+        include_egress_config: Optional[bool] = None,
+        page_count: Optional[int] = None,
+        sort_by: Optional[Union[str, "_models.AlertsSortByFields"]] = None,
+        sort_order: Optional[Union[str, "_models.SortOrder"]] = None,
+        select: Optional[str] = None,
+        time_range: Optional[Union[str, "_models.TimeRange"]] = None,
+        custom_time_range: Optional[str] = None,
+        **kwargs: Any
+    ) -> AsyncIterable["_models.AlertsList"]:
         """List all existing alerts, where the results can be filtered on the basis of multiple parameters
         (e.g. time range). The results can then be sorted on the basis specific fields, with the
         default being lastModifiedDateTime.
@@ -473,7 +176,7 @@ class AlertsOperations(object):
         :paramtype api_version: str
         :keyword callable cls: A custom type or function that will be passed the direct response
         :return: An iterator like instance of either AlertsList or the result of cls(response)
-        :rtype: ~azure.core.paging.ItemPaged[~alerts_management_client.models.AlertsList]
+        :rtype: ~azure.core.async_paging.AsyncItemPaged[~alerts_management_client.models.AlertsList]
         :raises: ~azure.core.exceptions.HttpResponseError
         """
         api_version = kwargs.pop('api_version', "2019-05-05-preview")  # type: str
@@ -540,17 +243,17 @@ class AlertsOperations(object):
                 request.method = "GET"
             return request
 
-        def extract_data(pipeline_response):
+        async def extract_data(pipeline_response):
             deserialized = self._deserialize("AlertsList", pipeline_response)
             list_of_elem = deserialized.value
             if cls:
                 list_of_elem = cls(list_of_elem)
-            return deserialized.next_link or None, iter(list_of_elem)
+            return deserialized.next_link or None, AsyncList(list_of_elem)
 
-        def get_next(next_link=None):
+        async def get_next(next_link=None):
             request = prepare_request(next_link)
 
-            pipeline_response = self._client._pipeline.run(request, stream=False, **kwargs)
+            pipeline_response = await self._client._pipeline.run(request, stream=False, **kwargs)
             response = pipeline_response.http_response
 
             if response.status_code not in [200]:
@@ -561,18 +264,17 @@ class AlertsOperations(object):
             return pipeline_response
 
 
-        return ItemPaged(
+        return AsyncItemPaged(
             get_next, extract_data
         )
     get_all.metadata = {'url': '/subscriptions/{subscriptionId}/providers/Microsoft.AlertsManagement/alerts'}  # type: ignore
 
-    @distributed_trace
-    def get_by_id(
+    @distributed_trace_async
+    async def get_by_id(
         self,
-        alert_id,  # type: str
-        **kwargs  # type: Any
-    ):
-        # type: (...) -> "_models.Alert"
+        alert_id: str,
+        **kwargs: Any
+    ) -> "_models.Alert":
         """Get a specific alert.
 
         Get information related to a specific alert.
@@ -605,7 +307,7 @@ class AlertsOperations(object):
         request = _convert_request(request)
         request.url = self._client.format_url(request.url)
 
-        pipeline_response = self._client._pipeline.run(request, stream=False, **kwargs)
+        pipeline_response = await self._client._pipeline.run(request, stream=False, **kwargs)
         response = pipeline_response.http_response
 
         if response.status_code not in [200]:
@@ -623,14 +325,13 @@ class AlertsOperations(object):
     get_by_id.metadata = {'url': '/subscriptions/{subscriptionId}/providers/Microsoft.AlertsManagement/alerts/{alertId}'}  # type: ignore
 
 
-    @distributed_trace
-    def change_state(
+    @distributed_trace_async
+    async def change_state(
         self,
-        alert_id,  # type: str
-        new_state,  # type: Union[str, "_models.AlertState"]
-        **kwargs  # type: Any
-    ):
-        # type: (...) -> "_models.Alert"
+        alert_id: str,
+        new_state: Union[str, "_models.AlertState"],
+        **kwargs: Any
+    ) -> "_models.Alert":
         """Change the state of an alert.
 
         :param alert_id: Unique ID of an alert instance.
@@ -664,7 +365,7 @@ class AlertsOperations(object):
         request = _convert_request(request)
         request.url = self._client.format_url(request.url)
 
-        pipeline_response = self._client._pipeline.run(request, stream=False, **kwargs)
+        pipeline_response = await self._client._pipeline.run(request, stream=False, **kwargs)
         response = pipeline_response.http_response
 
         if response.status_code not in [200]:
@@ -682,13 +383,12 @@ class AlertsOperations(object):
     change_state.metadata = {'url': '/subscriptions/{subscriptionId}/providers/Microsoft.AlertsManagement/alerts/{alertId}/changestate'}  # type: ignore
 
 
-    @distributed_trace
-    def get_history(
+    @distributed_trace_async
+    async def get_history(
         self,
-        alert_id,  # type: str
-        **kwargs  # type: Any
-    ):
-        # type: (...) -> "_models.AlertModification"
+        alert_id: str,
+        **kwargs: Any
+    ) -> "_models.AlertModification":
         """Get the history of an alert, which captures any monitor condition changes (Fired/Resolved) and
         alert state changes (New/Acknowledged/Closed).
 
@@ -720,7 +420,7 @@ class AlertsOperations(object):
         request = _convert_request(request)
         request.url = self._client.format_url(request.url)
 
-        pipeline_response = self._client._pipeline.run(request, stream=False, **kwargs)
+        pipeline_response = await self._client._pipeline.run(request, stream=False, **kwargs)
         response = pipeline_response.http_response
 
         if response.status_code not in [200]:
@@ -738,24 +438,23 @@ class AlertsOperations(object):
     get_history.metadata = {'url': '/subscriptions/{subscriptionId}/providers/Microsoft.AlertsManagement/alerts/{alertId}/history'}  # type: ignore
 
 
-    @distributed_trace
-    def get_summary(
+    @distributed_trace_async
+    async def get_summary(
         self,
-        groupby,  # type: Union[str, "_models.AlertsSummaryGroupByFields"]
-        include_smart_groups_count=None,  # type: Optional[bool]
-        target_resource=None,  # type: Optional[str]
-        target_resource_type=None,  # type: Optional[str]
-        target_resource_group=None,  # type: Optional[str]
-        monitor_service=None,  # type: Optional[Union[str, "_models.MonitorService"]]
-        monitor_condition=None,  # type: Optional[Union[str, "_models.MonitorCondition"]]
-        severity=None,  # type: Optional[Union[str, "_models.Severity"]]
-        alert_state=None,  # type: Optional[Union[str, "_models.AlertState"]]
-        alert_rule=None,  # type: Optional[str]
-        time_range=None,  # type: Optional[Union[str, "_models.TimeRange"]]
-        custom_time_range=None,  # type: Optional[str]
-        **kwargs  # type: Any
-    ):
-        # type: (...) -> "_models.AlertsSummary"
+        groupby: Union[str, "_models.AlertsSummaryGroupByFields"],
+        include_smart_groups_count: Optional[bool] = None,
+        target_resource: Optional[str] = None,
+        target_resource_type: Optional[str] = None,
+        target_resource_group: Optional[str] = None,
+        monitor_service: Optional[Union[str, "_models.MonitorService"]] = None,
+        monitor_condition: Optional[Union[str, "_models.MonitorCondition"]] = None,
+        severity: Optional[Union[str, "_models.Severity"]] = None,
+        alert_state: Optional[Union[str, "_models.AlertState"]] = None,
+        alert_rule: Optional[str] = None,
+        time_range: Optional[Union[str, "_models.TimeRange"]] = None,
+        custom_time_range: Optional[str] = None,
+        **kwargs: Any
+    ) -> "_models.AlertsSummary":
         """Get a summarized count of your alerts grouped by various parameters (e.g. grouping by
         'Severity' returns the count of alerts for each severity).
 
@@ -830,7 +529,7 @@ class AlertsOperations(object):
         request = _convert_request(request)
         request.url = self._client.format_url(request.url)
 
-        pipeline_response = self._client._pipeline.run(request, stream=False, **kwargs)
+        pipeline_response = await self._client._pipeline.run(request, stream=False, **kwargs)
         response = pipeline_response.http_response
 
         if response.status_code not in [200]:

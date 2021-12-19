@@ -4,205 +4,25 @@
 # Changes may cause incorrect behavior and will be lost if the code is regenerated.
 # --------------------------------------------------------------------------
 import functools
-from typing import TYPE_CHECKING
+from typing import Any, AsyncIterable, Callable, Dict, Generic, Optional, TypeVar, Union
 import warnings
 
+from azure.core.async_paging import AsyncItemPaged, AsyncList
 from azure.core.exceptions import ClientAuthenticationError, HttpResponseError, ResourceExistsError, ResourceNotFoundError, map_error
-from azure.core.paging import ItemPaged
 from azure.core.pipeline import PipelineResponse
-from azure.core.pipeline.transport import HttpResponse
+from azure.core.pipeline.transport import AsyncHttpResponse
 from azure.core.rest import HttpRequest
 from azure.core.tracing.decorator import distributed_trace
-from msrest import Serializer
+from azure.core.tracing.decorator_async import distributed_trace_async
 
-from .. import models as _models
-from .._vendor import _convert_request, _format_url_section
+from ... import models as _models
+from ..._vendor import _convert_request
+from ...operations._smart_groups_operations import build_change_state_request, build_get_all_request, build_get_by_id_request, build_get_history_request
+T = TypeVar('T')
+ClsType = Optional[Callable[[PipelineResponse[HttpRequest, AsyncHttpResponse], T, Dict[str, Any]], Any]]
 
-if TYPE_CHECKING:
-    # pylint: disable=unused-import,ungrouped-imports
-    from typing import Any, Callable, Dict, Generic, Iterable, Optional, TypeVar, Union
-    T = TypeVar('T')
-    ClsType = Optional[Callable[[PipelineResponse[HttpRequest, HttpResponse], T, Dict[str, Any]], Any]]
-
-_SERIALIZER = Serializer()
-_SERIALIZER.client_side_validation = False
-# fmt: off
-
-def build_get_all_request(
-    subscription_id,  # type: str
-    **kwargs  # type: Any
-):
-    # type: (...) -> HttpRequest
-    api_version = kwargs.pop('api_version', "2019-05-05-preview")  # type: str
-    target_resource = kwargs.pop('target_resource', None)  # type: Optional[str]
-    target_resource_group = kwargs.pop('target_resource_group', None)  # type: Optional[str]
-    target_resource_type = kwargs.pop('target_resource_type', None)  # type: Optional[str]
-    monitor_service = kwargs.pop('monitor_service', None)  # type: Optional[Union[str, "_models.MonitorService"]]
-    monitor_condition = kwargs.pop('monitor_condition', None)  # type: Optional[Union[str, "_models.MonitorCondition"]]
-    severity = kwargs.pop('severity', None)  # type: Optional[Union[str, "_models.Severity"]]
-    smart_group_state = kwargs.pop('smart_group_state', None)  # type: Optional[Union[str, "_models.AlertState"]]
-    time_range = kwargs.pop('time_range', None)  # type: Optional[Union[str, "_models.TimeRange"]]
-    page_count = kwargs.pop('page_count', None)  # type: Optional[int]
-    sort_by = kwargs.pop('sort_by', None)  # type: Optional[Union[str, "_models.SmartGroupsSortByFields"]]
-    sort_order = kwargs.pop('sort_order', None)  # type: Optional[Union[str, "_models.SortOrder"]]
-
-    accept = "application/json"
-    # Construct URL
-    url = kwargs.pop("template_url", '/subscriptions/{subscriptionId}/providers/Microsoft.AlertsManagement/smartGroups')
-    path_format_arguments = {
-        "subscriptionId": _SERIALIZER.url("subscription_id", subscription_id, 'str', min_length=1),
-    }
-
-    url = _format_url_section(url, **path_format_arguments)
-
-    # Construct parameters
-    query_parameters = kwargs.pop("params", {})  # type: Dict[str, Any]
-    if target_resource is not None:
-        query_parameters['targetResource'] = _SERIALIZER.query("target_resource", target_resource, 'str')
-    if target_resource_group is not None:
-        query_parameters['targetResourceGroup'] = _SERIALIZER.query("target_resource_group", target_resource_group, 'str')
-    if target_resource_type is not None:
-        query_parameters['targetResourceType'] = _SERIALIZER.query("target_resource_type", target_resource_type, 'str')
-    if monitor_service is not None:
-        query_parameters['monitorService'] = _SERIALIZER.query("monitor_service", monitor_service, 'str')
-    if monitor_condition is not None:
-        query_parameters['monitorCondition'] = _SERIALIZER.query("monitor_condition", monitor_condition, 'str')
-    if severity is not None:
-        query_parameters['severity'] = _SERIALIZER.query("severity", severity, 'str')
-    if smart_group_state is not None:
-        query_parameters['smartGroupState'] = _SERIALIZER.query("smart_group_state", smart_group_state, 'str')
-    if time_range is not None:
-        query_parameters['timeRange'] = _SERIALIZER.query("time_range", time_range, 'str')
-    if page_count is not None:
-        query_parameters['pageCount'] = _SERIALIZER.query("page_count", page_count, 'long')
-    if sort_by is not None:
-        query_parameters['sortBy'] = _SERIALIZER.query("sort_by", sort_by, 'str')
-    if sort_order is not None:
-        query_parameters['SortOrder'] = _SERIALIZER.query("sort_order", sort_order, 'str')
-    query_parameters['api-version'] = _SERIALIZER.query("api_version", api_version, 'str')
-
-    # Construct headers
-    header_parameters = kwargs.pop("headers", {})  # type: Dict[str, Any]
-    header_parameters['Accept'] = _SERIALIZER.header("accept", accept, 'str')
-
-    return HttpRequest(
-        method="GET",
-        url=url,
-        params=query_parameters,
-        headers=header_parameters,
-        **kwargs
-    )
-
-
-def build_get_by_id_request(
-    subscription_id,  # type: str
-    smart_group_id,  # type: str
-    **kwargs  # type: Any
-):
-    # type: (...) -> HttpRequest
-    api_version = kwargs.pop('api_version', "2019-05-05-preview")  # type: str
-
-    accept = "application/json"
-    # Construct URL
-    url = kwargs.pop("template_url", '/subscriptions/{subscriptionId}/providers/Microsoft.AlertsManagement/smartGroups/{smartGroupId}')
-    path_format_arguments = {
-        "subscriptionId": _SERIALIZER.url("subscription_id", subscription_id, 'str', min_length=1),
-        "smartGroupId": _SERIALIZER.url("smart_group_id", smart_group_id, 'str'),
-    }
-
-    url = _format_url_section(url, **path_format_arguments)
-
-    # Construct parameters
-    query_parameters = kwargs.pop("params", {})  # type: Dict[str, Any]
-    query_parameters['api-version'] = _SERIALIZER.query("api_version", api_version, 'str')
-
-    # Construct headers
-    header_parameters = kwargs.pop("headers", {})  # type: Dict[str, Any]
-    header_parameters['Accept'] = _SERIALIZER.header("accept", accept, 'str')
-
-    return HttpRequest(
-        method="GET",
-        url=url,
-        params=query_parameters,
-        headers=header_parameters,
-        **kwargs
-    )
-
-
-def build_change_state_request(
-    subscription_id,  # type: str
-    smart_group_id,  # type: str
-    **kwargs  # type: Any
-):
-    # type: (...) -> HttpRequest
-    api_version = kwargs.pop('api_version', "2019-05-05-preview")  # type: str
-    new_state = kwargs.pop('new_state')  # type: Union[str, "_models.AlertState"]
-
-    accept = "application/json"
-    # Construct URL
-    url = kwargs.pop("template_url", '/subscriptions/{subscriptionId}/providers/Microsoft.AlertsManagement/smartGroups/{smartGroupId}/changeState')
-    path_format_arguments = {
-        "subscriptionId": _SERIALIZER.url("subscription_id", subscription_id, 'str', min_length=1),
-        "smartGroupId": _SERIALIZER.url("smart_group_id", smart_group_id, 'str'),
-    }
-
-    url = _format_url_section(url, **path_format_arguments)
-
-    # Construct parameters
-    query_parameters = kwargs.pop("params", {})  # type: Dict[str, Any]
-    query_parameters['api-version'] = _SERIALIZER.query("api_version", api_version, 'str')
-    query_parameters['newState'] = _SERIALIZER.query("new_state", new_state, 'str')
-
-    # Construct headers
-    header_parameters = kwargs.pop("headers", {})  # type: Dict[str, Any]
-    header_parameters['Accept'] = _SERIALIZER.header("accept", accept, 'str')
-
-    return HttpRequest(
-        method="POST",
-        url=url,
-        params=query_parameters,
-        headers=header_parameters,
-        **kwargs
-    )
-
-
-def build_get_history_request(
-    subscription_id,  # type: str
-    smart_group_id,  # type: str
-    **kwargs  # type: Any
-):
-    # type: (...) -> HttpRequest
-    api_version = kwargs.pop('api_version', "2019-05-05-preview")  # type: str
-
-    accept = "application/json"
-    # Construct URL
-    url = kwargs.pop("template_url", '/subscriptions/{subscriptionId}/providers/Microsoft.AlertsManagement/smartGroups/{smartGroupId}/history')
-    path_format_arguments = {
-        "subscriptionId": _SERIALIZER.url("subscription_id", subscription_id, 'str', min_length=1),
-        "smartGroupId": _SERIALIZER.url("smart_group_id", smart_group_id, 'str'),
-    }
-
-    url = _format_url_section(url, **path_format_arguments)
-
-    # Construct parameters
-    query_parameters = kwargs.pop("params", {})  # type: Dict[str, Any]
-    query_parameters['api-version'] = _SERIALIZER.query("api_version", api_version, 'str')
-
-    # Construct headers
-    header_parameters = kwargs.pop("headers", {})  # type: Dict[str, Any]
-    header_parameters['Accept'] = _SERIALIZER.header("accept", accept, 'str')
-
-    return HttpRequest(
-        method="GET",
-        url=url,
-        params=query_parameters,
-        headers=header_parameters,
-        **kwargs
-    )
-
-# fmt: on
-class SmartGroupsOperations(object):
-    """SmartGroupsOperations operations.
+class SmartGroupsOperations:
+    """SmartGroupsOperations async operations.
 
     You should not instantiate this class directly. Instead, you should create a Client instance that
     instantiates it for you and attaches it as an attribute.
@@ -217,7 +37,7 @@ class SmartGroupsOperations(object):
 
     models = _models
 
-    def __init__(self, client, config, serializer, deserializer):
+    def __init__(self, client, config, serializer, deserializer) -> None:
         self._client = client
         self._serialize = serializer
         self._deserialize = deserializer
@@ -226,20 +46,19 @@ class SmartGroupsOperations(object):
     @distributed_trace
     def get_all(
         self,
-        target_resource=None,  # type: Optional[str]
-        target_resource_group=None,  # type: Optional[str]
-        target_resource_type=None,  # type: Optional[str]
-        monitor_service=None,  # type: Optional[Union[str, "_models.MonitorService"]]
-        monitor_condition=None,  # type: Optional[Union[str, "_models.MonitorCondition"]]
-        severity=None,  # type: Optional[Union[str, "_models.Severity"]]
-        smart_group_state=None,  # type: Optional[Union[str, "_models.AlertState"]]
-        time_range=None,  # type: Optional[Union[str, "_models.TimeRange"]]
-        page_count=None,  # type: Optional[int]
-        sort_by=None,  # type: Optional[Union[str, "_models.SmartGroupsSortByFields"]]
-        sort_order=None,  # type: Optional[Union[str, "_models.SortOrder"]]
-        **kwargs  # type: Any
-    ):
-        # type: (...) -> Iterable["_models.SmartGroupsList"]
+        target_resource: Optional[str] = None,
+        target_resource_group: Optional[str] = None,
+        target_resource_type: Optional[str] = None,
+        monitor_service: Optional[Union[str, "_models.MonitorService"]] = None,
+        monitor_condition: Optional[Union[str, "_models.MonitorCondition"]] = None,
+        severity: Optional[Union[str, "_models.Severity"]] = None,
+        smart_group_state: Optional[Union[str, "_models.AlertState"]] = None,
+        time_range: Optional[Union[str, "_models.TimeRange"]] = None,
+        page_count: Optional[int] = None,
+        sort_by: Optional[Union[str, "_models.SmartGroupsSortByFields"]] = None,
+        sort_order: Optional[Union[str, "_models.SortOrder"]] = None,
+        **kwargs: Any
+    ) -> AsyncIterable["_models.SmartGroupsList"]:
         """Get all Smart Groups within a specified subscription.
 
         List all the Smart Groups within a specified subscription.
@@ -279,7 +98,8 @@ class SmartGroupsOperations(object):
         :paramtype api_version: str
         :keyword callable cls: A custom type or function that will be passed the direct response
         :return: An iterator like instance of either SmartGroupsList or the result of cls(response)
-        :rtype: ~azure.core.paging.ItemPaged[~alerts_management_client.models.SmartGroupsList]
+        :rtype:
+         ~azure.core.async_paging.AsyncItemPaged[~alerts_management_client.models.SmartGroupsList]
         :raises: ~azure.core.exceptions.HttpResponseError
         """
         api_version = kwargs.pop('api_version', "2019-05-05-preview")  # type: str
@@ -334,17 +154,17 @@ class SmartGroupsOperations(object):
                 request.method = "GET"
             return request
 
-        def extract_data(pipeline_response):
+        async def extract_data(pipeline_response):
             deserialized = self._deserialize("SmartGroupsList", pipeline_response)
             list_of_elem = deserialized.value
             if cls:
                 list_of_elem = cls(list_of_elem)
-            return deserialized.next_link or None, iter(list_of_elem)
+            return deserialized.next_link or None, AsyncList(list_of_elem)
 
-        def get_next(next_link=None):
+        async def get_next(next_link=None):
             request = prepare_request(next_link)
 
-            pipeline_response = self._client._pipeline.run(request, stream=False, **kwargs)
+            pipeline_response = await self._client._pipeline.run(request, stream=False, **kwargs)
             response = pipeline_response.http_response
 
             if response.status_code not in [200]:
@@ -355,18 +175,17 @@ class SmartGroupsOperations(object):
             return pipeline_response
 
 
-        return ItemPaged(
+        return AsyncItemPaged(
             get_next, extract_data
         )
     get_all.metadata = {'url': '/subscriptions/{subscriptionId}/providers/Microsoft.AlertsManagement/smartGroups'}  # type: ignore
 
-    @distributed_trace
-    def get_by_id(
+    @distributed_trace_async
+    async def get_by_id(
         self,
-        smart_group_id,  # type: str
-        **kwargs  # type: Any
-    ):
-        # type: (...) -> "_models.SmartGroup"
+        smart_group_id: str,
+        **kwargs: Any
+    ) -> "_models.SmartGroup":
         """Get information related to a specific Smart Group.
 
         Get information related to a specific Smart Group.
@@ -399,7 +218,7 @@ class SmartGroupsOperations(object):
         request = _convert_request(request)
         request.url = self._client.format_url(request.url)
 
-        pipeline_response = self._client._pipeline.run(request, stream=False, **kwargs)
+        pipeline_response = await self._client._pipeline.run(request, stream=False, **kwargs)
         response = pipeline_response.http_response
 
         if response.status_code not in [200]:
@@ -420,14 +239,13 @@ class SmartGroupsOperations(object):
     get_by_id.metadata = {'url': '/subscriptions/{subscriptionId}/providers/Microsoft.AlertsManagement/smartGroups/{smartGroupId}'}  # type: ignore
 
 
-    @distributed_trace
-    def change_state(
+    @distributed_trace_async
+    async def change_state(
         self,
-        smart_group_id,  # type: str
-        new_state,  # type: Union[str, "_models.AlertState"]
-        **kwargs  # type: Any
-    ):
-        # type: (...) -> "_models.SmartGroup"
+        smart_group_id: str,
+        new_state: Union[str, "_models.AlertState"],
+        **kwargs: Any
+    ) -> "_models.SmartGroup":
         """Change the state of a Smart Group.
 
         :param smart_group_id: Smart group unique id.
@@ -461,7 +279,7 @@ class SmartGroupsOperations(object):
         request = _convert_request(request)
         request.url = self._client.format_url(request.url)
 
-        pipeline_response = self._client._pipeline.run(request, stream=False, **kwargs)
+        pipeline_response = await self._client._pipeline.run(request, stream=False, **kwargs)
         response = pipeline_response.http_response
 
         if response.status_code not in [200]:
@@ -482,13 +300,12 @@ class SmartGroupsOperations(object):
     change_state.metadata = {'url': '/subscriptions/{subscriptionId}/providers/Microsoft.AlertsManagement/smartGroups/{smartGroupId}/changeState'}  # type: ignore
 
 
-    @distributed_trace
-    def get_history(
+    @distributed_trace_async
+    async def get_history(
         self,
-        smart_group_id,  # type: str
-        **kwargs  # type: Any
-    ):
-        # type: (...) -> "_models.SmartGroupModification"
+        smart_group_id: str,
+        **kwargs: Any
+    ) -> "_models.SmartGroupModification":
         """Get the history a smart group, which captures any Smart Group state changes
         (New/Acknowledged/Closed) .
 
@@ -520,7 +337,7 @@ class SmartGroupsOperations(object):
         request = _convert_request(request)
         request.url = self._client.format_url(request.url)
 
-        pipeline_response = self._client._pipeline.run(request, stream=False, **kwargs)
+        pipeline_response = await self._client._pipeline.run(request, stream=False, **kwargs)
         response = pipeline_response.http_response
 
         if response.status_code not in [200]:
