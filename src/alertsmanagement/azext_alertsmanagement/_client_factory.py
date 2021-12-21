@@ -22,8 +22,8 @@ def cf_smart_groups(cli_ctx, *_):
     return cf_alertsmanagement(cli_ctx).smart_groups
 
 
-def cf_action_rules(cli_ctx, *_):
-    return cf_alertsmanagement(cli_ctx).action_rules
+def cf_processing_rules(cli_ctx, *_):
+    return cf_alertsmanagement(cli_ctx).alert_processing_rules
 
 
 def cf_smart_detector_alert_rules(cli_ctx, *_):

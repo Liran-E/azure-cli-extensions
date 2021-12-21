@@ -13,7 +13,7 @@ from azure.cli.core.commands.parameters import (
 )
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from knack.arguments import CLIArgumentType
-from .vendored_sdks.alertsmanagement.models import ActionRuleStatus, SuppressionType
+#from .vendored_sdks.alertsmanagement.models import ActionRuleStatus, SuppressionType
 
 
 def load_arguments(self, _):
@@ -27,7 +27,7 @@ def load_arguments(self, _):
         c.argument('action_rule_name', action_rule_name)
         c.argument('location', arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
         c.argument('tags', tags_type)
-        c.argument('status', arg_type=get_enum_type(ActionRuleStatus), id_part=None, help='Indicate if the given action rule is enabled or disabled. Default to enabled.')
+        #c.argument('status', arg_type=get_enum_type(ActionRuleStatus), id_part=None, help='Indicate if the given action rule is enabled or disabled. Default to enabled.')
         c.argument('rule_type', arg_type=get_enum_type(['Suppression', 'ActionGroup', 'Diagnostics']), help='Indicate type of action rule')
         c.argument('description', help='Description of action rule')
         c.argument('scope_type', help='Type of target scope', arg_type=get_enum_type(['ResourceGroup', 'Resource']))
@@ -39,7 +39,7 @@ def load_arguments(self, _):
         c.argument('alert_rule', nargs='+', help='Filter alerts by alert rule name or ID')
         c.argument('alert_description', nargs='+', help='Filter alerts by alert rule description')
         c.argument('alert_context', nargs='+', help='Filter alerts by alert context (payload)')
-        c.argument('suppression_recurrence_type', arg_type=get_enum_type(SuppressionType), help='Specifies when the suppression should be applied')
+        #.argument('suppression_recurrence_type', arg_type=get_enum_type(SuppressionType), help='Specifies when the suppression should be applied')
         c.argument('suppression_start_date', help='Start date for suppression. Format: MM/DD/YYYY')
         c.argument('suppression_end_date', help='End date for suppression. Format: MM/DD/YYYY')
         c.argument('suppression_start_time', help='Start time for suppression. Format: hh:mm:ss')
